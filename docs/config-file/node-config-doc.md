@@ -1874,12 +1874,13 @@ FallbackToSequentialModeOnSynchronized=false
 **Type:** : `object`
 **Description:** L2Synchronization Configuration for L2 synchronization
 
-| Property                                                                                                | Pattern | Type    | Deprecated | Definition | Title/Description                                                                                                                                                   |
-| ------------------------------------------------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| - [Enabled](#Synchronizer_L2Synchronization_Enabled )                                                   | No      | boolean | No         | -          | If enabled then the L2 sync process is permitted (only for permissionless)                                                                                          |
-| - [AcceptEmptyClosedBatches](#Synchronizer_L2Synchronization_AcceptEmptyClosedBatches )                 | No      | boolean | No         | -          | AcceptEmptyClosedBatches is a flag to enable or disable the acceptance of empty batches.<br />if true, the synchronizer will accept empty batches and process them. |
-| - [ReprocessFullBatchOnClose](#Synchronizer_L2Synchronization_ReprocessFullBatchOnClose )               | No      | boolean | No         | -          | ReprocessFullBatchOnClose if is true when a batch is closed is force to reprocess again                                                                             |
-| - [CheckLastL2BlockHashOnCloseBatch](#Synchronizer_L2Synchronization_CheckLastL2BlockHashOnCloseBatch ) | No      | boolean | No         | -          | CheckLastL2BlockHashOnCloseBatch if is true when a batch is closed is force to check the last L2Block hash                                                          |
+| Property                                                                                                | Pattern | Type            | Deprecated | Definition | Title/Description                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------- | ------- | --------------- | ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| - [Enabled](#Synchronizer_L2Synchronization_Enabled )                                                   | No      | boolean         | No         | -          | If enabled then the L2 sync process is permitted (only for permissionless)                                                                                          |
+| - [AcceptEmptyClosedBatches](#Synchronizer_L2Synchronization_AcceptEmptyClosedBatches )                 | No      | boolean         | No         | -          | AcceptEmptyClosedBatches is a flag to enable or disable the acceptance of empty batches.<br />if true, the synchronizer will accept empty batches and process them. |
+| - [ReprocessFullBatchOnClose](#Synchronizer_L2Synchronization_ReprocessFullBatchOnClose )               | No      | boolean         | No         | -          | ReprocessFullBatchOnClose if is true when a batch is closed is force to reprocess again                                                                             |
+| - [CheckLastL2BlockHashOnCloseBatch](#Synchronizer_L2Synchronization_CheckLastL2BlockHashOnCloseBatch ) | No      | boolean         | No         | -          | CheckLastL2BlockHashOnCloseBatch if is true when a batch is closed is force to check the last L2Block hash                                                          |
+| - [DataSourcePriority](#Synchronizer_L2Synchronization_DataSourcePriority )                             | No      | array of string | No         | -          | DataSourcePriority defines the order in which L2 batch should be retrieved: local, trusted, external                                                                |
 
 #### <a name="Synchronizer_L2Synchronization_Enabled"></a>9.10.1. `Synchronizer.L2Synchronization.Enabled`
 
@@ -1936,6 +1937,20 @@ ReprocessFullBatchOnClose=false
 ```
 [Synchronizer.L2Synchronization]
 CheckLastL2BlockHashOnCloseBatch=true
+```
+
+#### <a name="Synchronizer_L2Synchronization_DataSourcePriority"></a>9.10.5. `Synchronizer.L2Synchronization.DataSourcePriority`
+
+**Type:** : `array of string`
+
+**Default:** `["local", "trusted", "external"]`
+
+**Description:** DataSourcePriority defines the order in which L2 batch should be retrieved: local, trusted, external
+
+**Example setting the default value** (["local", "trusted", "external"]):
+```
+[Synchronizer.L2Synchronization]
+DataSourcePriority=["local", "trusted", "external"]
 ```
 
 ## <a name="Sequencer"></a>10. `[Sequencer]`
@@ -2721,6 +2736,7 @@ InactivityCheckInterval="5s"
 | - [PrivateKey](#SequenceSender_PrivateKey )                                                             | No      | object           | No         | -          | PrivateKey defines all the key store files that are going<br />to be read in order to provide the private keys to sign the L1 txs                                                                                                                                                                                                                                                                                             |
 | - [ForkUpgradeBatchNumber](#SequenceSender_ForkUpgradeBatchNumber )                                     | No      | integer          | No         | -          | Batch number where there is a forkid change (fork upgrade)                                                                                                                                                                                                                                                                                                                                                                    |
 | - [GasOffset](#SequenceSender_GasOffset )                                                               | No      | integer          | No         | -          | GasOffset is the amount of gas to be added to the gas estimation in order<br />to provide an amount that is higher than the estimated one. This is used<br />to avoid the TX getting reverted in case something has changed in the network<br />state after the estimation which can cause the TX to require more gas to be<br />executed.<br /><br />ex:<br />gas estimation: 1000<br />gas offset: 100<br />final gas: 1100 |
+| - [MaxBatchesForL1](#SequenceSender_MaxBatchesForL1 )                                                   | No      | integer          | No         | -          | MaxBatchesForL1 is the maximum amount of batches to be sequenced in a single L1 tx                                                                                                                                                                                                                                                                                                                                            |
 | - [SequenceL1BlockConfirmations](#SequenceSender_SequenceL1BlockConfirmations )                         | No      | integer          | No         | -          | SequenceL1BlockConfirmations is number of blocks to consider a sequence sent to L1 as final                                                                                                                                                                                                                                                                                                                                   |
 
 ### <a name="SequenceSender_WaitPeriodSendSequence"></a>11.1. `SequenceSender.WaitPeriodSendSequence`
@@ -2916,7 +2932,21 @@ final gas: 1100
 GasOffset=80000
 ```
 
-### <a name="SequenceSender_SequenceL1BlockConfirmations"></a>11.10. `SequenceSender.SequenceL1BlockConfirmations`
+### <a name="SequenceSender_MaxBatchesForL1"></a>11.10. `SequenceSender.MaxBatchesForL1`
+
+**Type:** : `integer`
+
+**Default:** `300`
+
+**Description:** MaxBatchesForL1 is the maximum amount of batches to be sequenced in a single L1 tx
+
+**Example setting the default value** (300):
+```
+[SequenceSender]
+MaxBatchesForL1=300
+```
+
+### <a name="SequenceSender_SequenceL1BlockConfirmations"></a>11.11. `SequenceSender.SequenceL1BlockConfirmations`
 
 **Type:** : `integer`
 
@@ -2952,6 +2982,10 @@ SequenceL1BlockConfirmations=32
 | - [GeneratingProofCleanupThreshold](#Aggregator_GeneratingProofCleanupThreshold )                   | No      | string  | No         | -          | GeneratingProofCleanupThreshold represents the time interval after<br />which a proof in generating state is considered to be stuck and<br />allowed to be cleared.                                                                                                                                                                                                                                                           |
 | - [GasOffset](#Aggregator_GasOffset )                                                               | No      | integer | No         | -          | GasOffset is the amount of gas to be added to the gas estimation in order<br />to provide an amount that is higher than the estimated one. This is used<br />to avoid the TX getting reverted in case something has changed in the network<br />state after the estimation which can cause the TX to require more gas to be<br />executed.<br /><br />ex:<br />gas estimation: 1000<br />gas offset: 100<br />final gas: 1100 |
 | - [UpgradeEtrogBatchNumber](#Aggregator_UpgradeEtrogBatchNumber )                                   | No      | integer | No         | -          | UpgradeEtrogBatchNumber is the number of the first batch after upgrading to etrog                                                                                                                                                                                                                                                                                                                                             |
+| - [SettlementBackend](#Aggregator_SettlementBackend )                                               | No      | string  | No         | -          | SettlementBackend configuration defines how a final ZKP should be settled. Directly to L1 or over the Beethoven service.                                                                                                                                                                                                                                                                                                      |
+| - [AggLayerTxTimeout](#Aggregator_AggLayerTxTimeout )                                               | No      | string  | No         | -          | Duration                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| - [AggLayerURL](#Aggregator_AggLayerURL )                                                           | No      | string  | No         | -          | AggLayerURL url of the agglayer service                                                                                                                                                                                                                                                                                                                                                                                       |
+| - [SequencerPrivateKey](#Aggregator_SequencerPrivateKey )                                           | No      | object  | No         | -          | SequencerPrivateKey Private key of the trusted sequencer                                                                                                                                                                                                                                                                                                                                                                      |
 | - [BatchProofL1BlockConfirmations](#Aggregator_BatchProofL1BlockConfirmations )                     | No      | integer | No         | -          | BatchProofL1BlockConfirmations is number of L1 blocks to consider we can generate the proof for a virtual batch                                                                                                                                                                                                                                                                                                               |
 
 ### <a name="Aggregator_Host"></a>12.1. `Aggregator.Host`
@@ -3230,7 +3264,99 @@ GasOffset=0
 UpgradeEtrogBatchNumber=0
 ```
 
-### <a name="Aggregator_BatchProofL1BlockConfirmations"></a>12.16. `Aggregator.BatchProofL1BlockConfirmations`
+### <a name="Aggregator_SettlementBackend"></a>12.16. `Aggregator.SettlementBackend`
+
+**Type:** : `string`
+
+**Default:** `"agglayer"`
+
+**Description:** SettlementBackend configuration defines how a final ZKP should be settled. Directly to L1 or over the Beethoven service.
+
+**Example setting the default value** ("agglayer"):
+```
+[Aggregator]
+SettlementBackend="agglayer"
+```
+
+### <a name="Aggregator_AggLayerTxTimeout"></a>12.17. `Aggregator.AggLayerTxTimeout`
+
+**Title:** Duration
+
+**Type:** : `string`
+
+**Default:** `"5m0s"`
+
+**Description:** AggLayerTxTimeout is the interval time to wait for a tx to be mined from the agglayer
+
+**Examples:** 
+
+```json
+"1m"
+```
+
+```json
+"300ms"
+```
+
+**Example setting the default value** ("5m0s"):
+```
+[Aggregator]
+AggLayerTxTimeout="5m0s"
+```
+
+### <a name="Aggregator_AggLayerURL"></a>12.18. `Aggregator.AggLayerURL`
+
+**Type:** : `string`
+
+**Default:** `"http://zkevm-agglayer"`
+
+**Description:** AggLayerURL url of the agglayer service
+
+**Example setting the default value** ("http://zkevm-agglayer"):
+```
+[Aggregator]
+AggLayerURL="http://zkevm-agglayer"
+```
+
+### <a name="Aggregator_SequencerPrivateKey"></a>12.19. `[Aggregator.SequencerPrivateKey]`
+
+**Type:** : `object`
+**Description:** SequencerPrivateKey Private key of the trusted sequencer
+
+| Property                                                | Pattern | Type   | Deprecated | Definition | Title/Description                                      |
+| ------------------------------------------------------- | ------- | ------ | ---------- | ---------- | ------------------------------------------------------ |
+| - [Path](#Aggregator_SequencerPrivateKey_Path )         | No      | string | No         | -          | Path is the file path for the key store file           |
+| - [Password](#Aggregator_SequencerPrivateKey_Password ) | No      | string | No         | -          | Password is the password to decrypt the key store file |
+
+#### <a name="Aggregator_SequencerPrivateKey_Path"></a>12.19.1. `Aggregator.SequencerPrivateKey.Path`
+
+**Type:** : `string`
+
+**Default:** `"/pk/sequencer.keystore"`
+
+**Description:** Path is the file path for the key store file
+
+**Example setting the default value** ("/pk/sequencer.keystore"):
+```
+[Aggregator.SequencerPrivateKey]
+Path="/pk/sequencer.keystore"
+```
+
+#### <a name="Aggregator_SequencerPrivateKey_Password"></a>12.19.2. `Aggregator.SequencerPrivateKey.Password`
+
+**Type:** : `string`
+
+**Default:** `"testonly"`
+
+**Description:** Password is the password to decrypt the key store file
+
+**Example setting the default value** ("testonly"):
+```
+[Aggregator.SequencerPrivateKey]
+Password="testonly"
+```
+
+### <a name="Aggregator_BatchProofL1BlockConfirmations"></a>12.20. `Aggregator.BatchProofL1BlockConfirmations`
 
 **Type:** : `integer`
 
@@ -3306,47 +3432,32 @@ chainId=0
 **Type:** : `object`
 **Description:** L1: Genesis of the rollup, first block number and root
 
-| Property                                                                       | Pattern | Type             | Deprecated | Definition | Title/Description                                                                           |
-| ------------------------------------------------------------------------------ | ------- | ---------------- | ---------- | ---------- | ------------------------------------------------------------------------------------------- |
-| - [RollupBlockNumber](#NetworkConfig_Genesis_RollupBlockNumber )               | No      | integer          | No         | -          | RollupBlockNumber is the block number where the polygonZKEVM smc was deployed on L1         |
-| - [RollupManagerBlockNumber](#NetworkConfig_Genesis_RollupManagerBlockNumber ) | No      | integer          | No         | -          | RollupManagerBlockNumber is the block number where the RollupManager smc was deployed on L1 |
-| - [Root](#NetworkConfig_Genesis_Root )                                         | No      | array of integer | No         | -          | Root hash of the genesis block                                                              |
-| - [Actions](#NetworkConfig_Genesis_Actions )                                   | No      | array of object  | No         | -          | Actions is the data to populate into the state trie                                         |
+| Property                                             | Pattern | Type             | Deprecated | Definition | Title/Description                                                             |
+| ---------------------------------------------------- | ------- | ---------------- | ---------- | ---------- | ----------------------------------------------------------------------------- |
+| - [BlockNumber](#NetworkConfig_Genesis_BlockNumber ) | No      | integer          | No         | -          | BlockNumber is the block number where the polygonZKEVM smc was deployed on L1 |
+| - [Root](#NetworkConfig_Genesis_Root )               | No      | array of integer | No         | -          | Root hash of the genesis block                                                |
+| - [Actions](#NetworkConfig_Genesis_Actions )         | No      | array of object  | No         | -          | Actions is the data to populate into the state trie                           |
 
-#### <a name="NetworkConfig_Genesis_RollupBlockNumber"></a>13.2.1. `NetworkConfig.Genesis.RollupBlockNumber`
-
-**Type:** : `integer`
-
-**Default:** `0`
-
-**Description:** RollupBlockNumber is the block number where the polygonZKEVM smc was deployed on L1
-
-**Example setting the default value** (0):
-```
-[NetworkConfig.Genesis]
-RollupBlockNumber=0
-```
-
-#### <a name="NetworkConfig_Genesis_RollupManagerBlockNumber"></a>13.2.2. `NetworkConfig.Genesis.RollupManagerBlockNumber`
+#### <a name="NetworkConfig_Genesis_BlockNumber"></a>13.2.1. `NetworkConfig.Genesis.BlockNumber`
 
 **Type:** : `integer`
 
 **Default:** `0`
 
-**Description:** RollupManagerBlockNumber is the block number where the RollupManager smc was deployed on L1
+**Description:** BlockNumber is the block number where the polygonZKEVM smc was deployed on L1
 
 **Example setting the default value** (0):
 ```
 [NetworkConfig.Genesis]
-RollupManagerBlockNumber=0
+BlockNumber=0
 ```
 
-#### <a name="NetworkConfig_Genesis_Root"></a>13.2.3. `NetworkConfig.Genesis.Root`
+#### <a name="NetworkConfig_Genesis_Root"></a>13.2.2. `NetworkConfig.Genesis.Root`
 
 **Type:** : `array of integer`
 **Description:** Root hash of the genesis block
 
-#### <a name="NetworkConfig_Genesis_Actions"></a>13.2.4. `NetworkConfig.Genesis.Actions`
+#### <a name="NetworkConfig_Genesis_Actions"></a>13.2.3. `NetworkConfig.Genesis.Actions`
 
 **Type:** : `array of object`
 **Description:** Actions is the data to populate into the state trie
@@ -3363,7 +3474,7 @@ RollupManagerBlockNumber=0
 | ----------------------------------------------------- | ------------------------------------------------------------------------- |
 | [Actions items](#NetworkConfig_Genesis_Actions_items) | GenesisAction represents one of the values set on the SMT during genesis. |
 
-##### <a name="autogenerated_heading_3"></a>13.2.4.1. [NetworkConfig.Genesis.Actions.Actions items]
+##### <a name="autogenerated_heading_3"></a>13.2.3.1. [NetworkConfig.Genesis.Actions.Actions items]
 
 **Type:** : `object`
 **Description:** GenesisAction represents one of the values set on the SMT during genesis.
@@ -3378,31 +3489,31 @@ RollupManagerBlockNumber=0
 | - [value](#NetworkConfig_Genesis_Actions_items_value )                     | No      | string  | No         | -          | -                 |
 | - [root](#NetworkConfig_Genesis_Actions_items_root )                       | No      | string  | No         | -          | -                 |
 
-##### <a name="NetworkConfig_Genesis_Actions_items_address"></a>13.2.4.1.1. `NetworkConfig.Genesis.Actions.Actions items.address`
+##### <a name="NetworkConfig_Genesis_Actions_items_address"></a>13.2.3.1.1. `NetworkConfig.Genesis.Actions.Actions items.address`
 
 **Type:** : `string`
 
-##### <a name="NetworkConfig_Genesis_Actions_items_type"></a>13.2.4.1.2. `NetworkConfig.Genesis.Actions.Actions items.type`
+##### <a name="NetworkConfig_Genesis_Actions_items_type"></a>13.2.3.1.2. `NetworkConfig.Genesis.Actions.Actions items.type`
 
 **Type:** : `integer`
 
-##### <a name="NetworkConfig_Genesis_Actions_items_storagePosition"></a>13.2.4.1.3. `NetworkConfig.Genesis.Actions.Actions items.storagePosition`
+##### <a name="NetworkConfig_Genesis_Actions_items_storagePosition"></a>13.2.3.1.3. `NetworkConfig.Genesis.Actions.Actions items.storagePosition`
 
 **Type:** : `string`
 
-##### <a name="NetworkConfig_Genesis_Actions_items_bytecode"></a>13.2.4.1.4. `NetworkConfig.Genesis.Actions.Actions items.bytecode`
+##### <a name="NetworkConfig_Genesis_Actions_items_bytecode"></a>13.2.3.1.4. `NetworkConfig.Genesis.Actions.Actions items.bytecode`
 
 **Type:** : `string`
 
-##### <a name="NetworkConfig_Genesis_Actions_items_key"></a>13.2.4.1.5. `NetworkConfig.Genesis.Actions.Actions items.key`
+##### <a name="NetworkConfig_Genesis_Actions_items_key"></a>13.2.3.1.5. `NetworkConfig.Genesis.Actions.Actions items.key`
 
 **Type:** : `string`
 
-##### <a name="NetworkConfig_Genesis_Actions_items_value"></a>13.2.4.1.6. `NetworkConfig.Genesis.Actions.Actions items.value`
+##### <a name="NetworkConfig_Genesis_Actions_items_value"></a>13.2.3.1.6. `NetworkConfig.Genesis.Actions.Actions items.value`
 
 **Type:** : `string`
 
-##### <a name="NetworkConfig_Genesis_Actions_items_root"></a>13.2.4.1.7. `NetworkConfig.Genesis.Actions.Actions items.root`
+##### <a name="NetworkConfig_Genesis_Actions_items_root"></a>13.2.3.1.7. `NetworkConfig.Genesis.Actions.Actions items.root`
 
 **Type:** : `string`
 
