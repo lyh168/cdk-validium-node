@@ -381,6 +381,15 @@ func newL2EthClient(url string) (*ethclient.Client, error) {
 	return ethClient, nil
 }
 
+func newL2EthClient(url string) (*ethclient.Client, error) {
+	ethClient, err := ethclient.Dial(url)
+	if err != nil {
+		log.Errorf("error connecting L1 to %s: %+v", url, err)
+		return nil, err
+	}
+	return ethClient, nil
+}
+
 func runSynchronizer(cfg config.Config, etherman *etherman.Client, ethTxManagerStorage *ethtxmanager.PostgresStorage, st *state.State, pool *pool.Pool, eventLog *event.EventLog) {
 	var trustedSequencerURL string
 	var err error

@@ -338,7 +338,7 @@ func (s *ClientSynchronizer) Sync() error {
 
 			header, err := s.etherMan.HeaderByNumber(s.ctx, big.NewInt(0).SetUint64(s.genesis.RollupBlockNumber))
 			if err != nil {
-				log.Errorf("error getting l1 block header for block %d. Error: %v", s.genesis.RollupBlockNumber, err)
+				log.Errorf("error getting l1 block header for block %d. Error: %v", s.genesis.BlockNumber, err)
 				return rollback(s.ctx, dbTx, err)
 			}
 			log.Info("synchronizing rollup creation block")
@@ -1002,7 +1002,7 @@ func (s *ClientSynchronizer) newCheckReorg(latestStoredBlock *state.Block, synce
 		log.Infof("[checkReorg function] reorgedBlockNumber: %d reorgedBlockHash already synced: %s", reorgedBlock.BlockNumber, reorgedBlock.BlockHash.String())
 
 		// Compare hashes
-		if (block.BlockHash != reorgedBlock.BlockHash || block.ParentHash != reorgedBlock.ParentHash) && reorgedBlock.BlockNumber > s.genesis.RollupBlockNumber {
+		if (block.BlockHash != reorgedBlock.BlockHash || block.ParentHash != reorgedBlock.ParentHash) && reorgedBlock.BlockNumber > s.genesis.BlockNumber {
 			log.Infof("checkReorg: Bad block %d hashOk %t parentHashOk %t", reorgedBlock.BlockNumber, block.BlockHash == reorgedBlock.BlockHash, block.ParentHash == reorgedBlock.ParentHash)
 			log.Debug("[checkReorg function] => latestBlockNumber: ", reorgedBlock.BlockNumber)
 			log.Debug("[checkReorg function] => latestBlockHash: ", reorgedBlock.BlockHash)
