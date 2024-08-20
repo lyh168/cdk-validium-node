@@ -114,11 +114,6 @@ func (_m *WorkerMock) MoveTxPendingToStore(txHash common.Hash, addr common.Addre
 	_m.Called(txHash, addr)
 }
 
-// MoveTxPendingToStore provides a mock function with given fields: txHash, addr
-func (_m *WorkerMock) MoveTxPendingToStore(txHash common.Hash, addr common.Address) {
-	_m.Called(txHash, addr)
-}
-
 // MoveTxToNotReady provides a mock function with given fields: txHash, from, actualNonce, actualBalance
 func (_m *WorkerMock) MoveTxToNotReady(txHash common.Hash, from common.Address, actualNonce *uint64, actualBalance *big.Int) []*TxTracker {
 	ret := _m.Called(txHash, from, actualNonce, actualBalance)

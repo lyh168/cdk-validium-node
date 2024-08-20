@@ -381,15 +381,6 @@ func newL2EthClient(url string) (*ethclient.Client, error) {
 	return ethClient, nil
 }
 
-func newL2EthClient(url string) (*ethclient.Client, error) {
-	ethClient, err := ethclient.Dial(url)
-	if err != nil {
-		log.Errorf("error connecting L1 to %s: %+v", url, err)
-		return nil, err
-	}
-	return ethClient, nil
-}
-
 func runSynchronizer(cfg config.Config, etherman *etherman.Client, ethTxManagerStorage *ethtxmanager.PostgresStorage, st *state.State, pool *pool.Pool, eventLog *event.EventLog) {
 	var trustedSequencerURL string
 	var err error
@@ -641,7 +632,7 @@ func newState(ctx context.Context, c *config.Config, etherman *etherman.Client, 
 	}
 	log.Infof("Starting L1InfoRoot: %v", l1inforoot.String())
 
-	forkIDIntervals, err := forkIDIntervals(ctx, st, etherman, c.NetworkConfig.Genesis.RollupBlockNumber)
+	forkIDIntervals, err := forkIDIntervals(ctx, st, etherman, c.NetworkConfig.Genesis.BlockNumber)
 	if err != nil {
 		log.Fatal("error getting forkIDs. Error: ", err)
 	}

@@ -115,10 +115,9 @@ func LoadGenesisFromJSONString(jsonStr string) (NetworkConfig, error) {
 
 	cfg.L1Config = cfgJSON.L1Config
 	cfg.Genesis = state.Genesis{
-		RollupBlockNumber:        cfgJSON.RollupCreationBlockNum,
-		RollupManagerBlockNumber: cfgJSON.RollupManagerCreationBlockNum,
-		Root:                     common.HexToHash(cfgJSON.Root),
-		Actions:                  []*state.GenesisAction{},
+		BlockNumber: cfgJSON.RollupCreationBlockNum,
+		Root:        common.HexToHash(cfgJSON.Root),
+		Actions:     []*state.GenesisAction{},
 	}
 
 	for _, account := range cfgJSON.Genesis {

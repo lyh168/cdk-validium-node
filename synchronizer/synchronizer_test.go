@@ -123,7 +123,7 @@ func TestGivenPermissionlessNodeWhenSyncronizeFirstTimeABatchThenStoreItInALocal
 // but it used a feature that is not implemented in new one that is asking beyond the last block on L1
 func TestForcedBatchEtrog(t *testing.T) {
 	genesis := state.Genesis{
-		RollupBlockNumber: uint64(123456),
+		BlockNumber: uint64(123456),
 	}
 	cfg := Config{
 		SyncInterval:          cfgTypes.Duration{Duration: 1 * time.Second},
@@ -401,7 +401,7 @@ func TestForcedBatchEtrog(t *testing.T) {
 // but it used a feature that is not implemented in new one that is asking beyond the last block on L1
 func TestSequenceForcedBatchIncaberry(t *testing.T) {
 	genesis := state.Genesis{
-		RollupBlockNumber: uint64(123456),
+		BlockNumber: uint64(123456),
 	}
 	cfg := Config{
 		SyncInterval:          cfgTypes.Duration{Duration: 1 * time.Second},
@@ -663,7 +663,7 @@ func TestSequenceForcedBatchIncaberry(t *testing.T) {
 
 func setupGenericTest(t *testing.T) (*state.Genesis, *Config, *mocks) {
 	genesis := state.Genesis{
-		RollupBlockNumber: uint64(123456),
+		BlockNumber: uint64(123456),
 	}
 	cfg := Config{
 		SyncInterval:          cfgTypes.Duration{Duration: 1 * time.Second},
