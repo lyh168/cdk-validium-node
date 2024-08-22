@@ -17,6 +17,8 @@ type EthermanFullInterface interface {
 	GetTrustedSequencerURL() (string, error)
 	VerifyGenBlockNumber(ctx context.Context, genBlockNumber uint64) (bool, error)
 	GetLatestVerifiedBatchNum() (uint64, error)
+	EthermanGetLatestBatchNumber
+	EthermanPreRollup
 
 	EthermanGetLatestBatchNumber
 	GetFinalizedBlockNumber(ctx context.Context) (uint64, error)
@@ -24,4 +26,9 @@ type EthermanFullInterface interface {
 
 type EthermanGetLatestBatchNumber interface {
 	GetLatestBatchNumber() (uint64, error)
+}
+
+type EthermanPreRollup interface {
+	GetL1BlockUpgradeLxLy(ctx context.Context, genesisBlock uint64) (uint64, error)
+	GetRollupInfoByBlockRangePreviousRollupGenesis(ctx context.Context, fromBlock uint64, toBlock *uint64) ([]etherman.Block, map[common.Hash][]etherman.Order, error)
 }
