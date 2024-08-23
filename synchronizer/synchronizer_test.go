@@ -120,7 +120,7 @@ func TestGivenPermissionlessNodeWhenSyncronizeFirstTimeABatchThenStoreItInALocal
 // but it used a feature that is not implemented in new one that is asking beyond the last block on L1
 func TestForcedBatchEtrog(t *testing.T) {
 	genesis := state.Genesis{
-		RollupBlockNumber: uint64(123456),
+		RollupBlockNumber: uint64(0),
 	}
 	cfg := Config{
 		SyncInterval:          cfgTypes.Duration{Duration: 1 * time.Second},
@@ -147,7 +147,15 @@ func TestForcedBatchEtrog(t *testing.T) {
 		ToBatchNumber:   ^uint64(0),
 	}
 	m.State.EXPECT().GetForkIDInMemory(uint64(7)).Return(&forkIdInterval)
+	parentHash := common.HexToHash("0x111")
+	ethHeader := &ethTypes.Header{Number: big.NewInt(1), ParentHash: parentHash}
+	ethBlock := ethTypes.NewBlockWithHeader(ethHeader)
+	lastBlock := &state.Block{BlockHash: ethBlock.Hash(), BlockNumber: ethBlock.Number().Uint64(), ParentHash: ethBlock.ParentHash()}
 
+	m.State.
+		On("GetLastBlock", mock.Anything, nil).
+		Return(lastBlock, nil).
+		Once()
 	m.State.
 		On("BeginStateTransaction", ctxMatchBy).
 		Run(func(args mock.Arguments) {
@@ -155,16 +163,17 @@ func TestForcedBatchEtrog(t *testing.T) {
 			parentHash := common.HexToHash("0x111")
 			ethHeader := &ethTypes.Header{Number: big.NewInt(1), ParentHash: parentHash}
 			ethBlock := ethTypes.NewBlockWithHeader(ethHeader)
-			lastBlock := &state.Block{BlockHash: ethBlock.Hash(), BlockNumber: ethBlock.Number().Uint64()}
+			lastBlock := &state.Block{BlockHash: ethBlock.Hash(), BlockNumber: ethBlock.Number().Uint64(), ParentHash: ethBlock.ParentHash()}
 
 			m.State.
 				On("GetForkIDByBatchNumber", mock.Anything).
 				Return(uint64(7), nil).
 				Maybe()
+
 			m.State.
 				On("GetLastBlock", ctx, m.DbTx).
 				Return(lastBlock, nil).
-				Once()
+				Maybe()
 
 			m.State.
 				On("GetLastBatchNumber", ctx, m.DbTx).
@@ -377,7 +386,7 @@ func TestForcedBatchEtrog(t *testing.T) {
 // but it used a feature that is not implemented in new one that is asking beyond the last block on L1
 func TestSequenceForcedBatchIncaberry(t *testing.T) {
 	genesis := state.Genesis{
-		RollupBlockNumber: uint64(123456),
+		RollupBlockNumber: uint64(0),
 	}
 	cfg := Config{
 		SyncInterval:          cfgTypes.Duration{Duration: 1 * time.Second},
@@ -396,7 +405,14 @@ func TestSequenceForcedBatchIncaberry(t *testing.T) {
 	ethermanForL1 := []syncinterfaces.EthermanFullInterface{m.Etherman}
 	sync, err := NewSynchronizer(true, m.Etherman, ethermanForL1, m.State, m.Pool, m.EthTxManager, m.ZKEVMClient, nil, genesis, cfg, false)
 	require.NoError(t, err)
-
+	parentHash := common.HexToHash("0x111")
+	ethHeader := &ethTypes.Header{Number: big.NewInt(1), ParentHash: parentHash}
+	ethBlock := ethTypes.NewBlockWithHeader(ethHeader)
+	lastBlock := &state.Block{BlockHash: ethBlock.Hash(), BlockNumber: ethBlock.Number().Uint64(), ParentHash: ethBlock.ParentHash()}
+	m.State.
+		On("GetLastBlock", mock.Anything, nil).
+		Return(lastBlock, nil).
+		Once()
 	// state preparation
 	ctxMatchBy := mock.MatchedBy(func(ctx context.Context) bool { return ctx != nil })
 	m.State.
@@ -406,7 +422,7 @@ func TestSequenceForcedBatchIncaberry(t *testing.T) {
 			parentHash := common.HexToHash("0x111")
 			ethHeader := &ethTypes.Header{Number: big.NewInt(1), ParentHash: parentHash}
 			ethBlock := ethTypes.NewBlockWithHeader(ethHeader)
-			lastBlock := &state.Block{BlockHash: ethBlock.Hash(), BlockNumber: ethBlock.Number().Uint64()}
+			lastBlock := &state.Block{BlockHash: ethBlock.Hash(), BlockNumber: ethBlock.Number().Uint64(), ParentHash: ethBlock.ParentHash()}
 			m.State.
 				On("GetForkIDByBatchNumber", mock.Anything).
 				Return(uint64(1), nil).
@@ -415,11 +431,6 @@ func TestSequenceForcedBatchIncaberry(t *testing.T) {
 				On("GetForkIDByBlockNumber", mock.Anything).
 				Return(uint64(1), nil).
 				Maybe()
-
-			m.State.
-				On("GetLastBlock", ctx, m.DbTx).
-				Return(lastBlock, nil).
-				Once()
 
 			m.State.
 				On("GetLastBatchNumber", ctx, m.DbTx).
