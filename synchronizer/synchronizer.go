@@ -324,11 +324,11 @@ func (s *ClientSynchronizer) getStartingL1Block(ctx context.Context, genesisBloc
 		log.Warnf("sync pregenesis: Last block processed is %d, which is greater or equal than the previous genesis block %d", lastBlock, genesisBlockNumber)
 		return false, 0, nil
 	}
-	log.Infof("sync pregenesis: Continue processing pre-genesis blocks, last block processed on DB is %d", lastBlock.BlockNumber)
-	return true, lastBlock.BlockNumber, nil
+	log.Infof("sync pregenesis: Continue processing pre-genesis blocks, last block processed on DB is %d", lastBlock.BlockNumber+1)
+	return true, lastBlock.BlockNumber + 1, nil
 }
 
-func (s *ClientSynchronizer) synchronizePreGenesisRollupEvents(ctx context.Context) error {
+func (s *ClientSynchronizer) synchronizePreGenesisRollupEvents(syncChunkSize uint64, ctx context.Context) error {
 	// Sync events from RollupManager that happen before rollup creation
 	startTime := time.Now()
 	log.Info("synchronizing events from RollupManager that happen before rollup creation")
@@ -342,15 +342,17 @@ func (s *ClientSynchronizer) synchronizePreGenesisRollupEvents(ctx context.Conte
 		return nil
 	}
 	toBlockFinal := s.genesis.RollupBlockNumber - 1
-	log.Infof("sync pregenesis: starting syncing pre genesis LxLy events from block %d to block %d (total %d blocks)",
-		fromBlock, toBlockFinal, toBlockFinal-fromBlock+1)
-	for i := fromBlock; true; i += s.cfg.SyncChunkSize {
-		toBlock := min(i+s.cfg.SyncChunkSize-1, toBlockFinal)
+	log.Infof("sync pregenesis: starting syncing pre genesis LxLy events from block %d to block %d (total %d blocks) chunk size %d",
+		fromBlock, toBlockFinal, toBlockFinal-fromBlock+1, syncChunkSize)
+	for i := fromBlock; true; i += syncChunkSize {
+		toBlock := min(i+syncChunkSize-1, toBlockFinal)
+		log.Debugf("sync pregenesis: syncing L1InfoTree from blocks [%d - %d] remains: %d", i, toBlock, toBlockFinal-toBlock)
 		blocks, order, err := s.etherMan.GetRollupInfoByBlockRangePreviousRollupGenesis(s.ctx, i, &toBlock)
 		if err != nil {
 			log.Error("sync pregenesis: error getting rollupInfoByBlockRange before rollup genesis: ", err)
 			return err
 		}
+		log.Debugf("sync pregenesis: syncing L1InfoTree from blocks [%d - %d] -> num_block:%d num_order:%d", i, toBlock, len(blocks), len(order))
 		err = s.ProcessBlockRange(blocks, order)
 		if err != nil {
 			log.Error("sync pregenesis: error processing blocks before the genesis: ", err)
@@ -375,8 +377,7 @@ func (s *ClientSynchronizer) processGenesis() (*state.Block, error) {
 		log.Error("genesis Block number configured is not valid. It is required the block number where the PolygonZkEVM smc was deployed")
 		return nil, fmt.Errorf("genesis Block number configured is not valid. It is required the block number where the PolygonZkEVM smc was deployed")
 	}
-	//TODO: ???
-	err = s.synchronizePreGenesisRollupEvents(s.ctx)
+	err = s.synchronizePreGenesisRollupEvents(s.cfg.SyncChunkSize, s.ctx)
 	if err != nil {
 		log.Error("error synchronizing pre genesis events: ", err)
 		return nil, err
