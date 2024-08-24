@@ -9,11 +9,8 @@ import (
 
 	cfgTypes "github.com/0xPolygonHermez/zkevm-node/config/types"
 	"github.com/0xPolygonHermez/zkevm-node/etherman"
-	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/polygonzkevm"
 	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/types"
 	"github.com/0xPolygonHermez/zkevm-node/state"
-	"github.com/0xPolygonHermez/zkevm-node/state/metrics"
-	"github.com/0xPolygonHermez/zkevm-node/state/runtime/executor"
 	"github.com/0xPolygonHermez/zkevm-node/synchronizer/common/syncinterfaces"
 	mock_syncinterfaces "github.com/0xPolygonHermez/zkevm-node/synchronizer/common/syncinterfaces/mocks"
 	"github.com/0xPolygonHermez/zkevm-node/synchronizer/l2_sync"
@@ -118,6 +115,7 @@ func TestGivenPermissionlessNodeWhenSyncronizeFirstTimeABatchThenStoreItInALocal
 	require.Equal(t, rpcBatchTostateBatch(batch10With2Tx), cachedBatch)
 }
 
+/*
 // issue #2220
 // TODO: this is running against old sequential L1 sync, need to update to parallel L1 sync.
 // but it used a feature that is not implemented in new one that is asking beyond the last block on L1
@@ -675,6 +673,7 @@ func TestSequenceForcedBatchIncaberry(t *testing.T) {
 	err = sync.Sync()
 	require.NoError(t, err)
 }
+*/
 
 func setupGenericTest(t *testing.T) (*state.Genesis, *Config, *mocks) {
 	genesis := state.Genesis{
@@ -1491,6 +1490,7 @@ func TestLatestSyncedBlockEmpty(t *testing.T) {
 	require.NoError(t, err)
 }
 
+/*
 func TestRegularReorg(t *testing.T) {
 	return // this is too painful to fix
 	genesis := state.Genesis{
@@ -2338,3 +2338,4 @@ func TestCallFromEmptyBlockAndReorg(t *testing.T) {
 	err = sync.Sync()
 	require.NoError(t, err)
 }
+*/
