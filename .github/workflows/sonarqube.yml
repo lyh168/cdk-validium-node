@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - feature/sonarcloud-coverage
+      - '**'
 
 jobs:
   sonarqube:
