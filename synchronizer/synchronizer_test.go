@@ -44,8 +44,8 @@ type mocks struct {
 	//EventLog     *eventLogMock
 }
 
-func TestExploraty(t *testing.T) {
-	t.Skip("This test a real tests, it is just for exploratory purposes")
+func TestExploratory(t *testing.T) {
+	t.Skip("This test is for exploratory purposes, it is not a real test")
 	cfg := etherman.Config{
 		URL:              "https://eth-sepolia.g.alchemy.com/v2/",
 		ForkIDChunkSize:  100,
@@ -66,7 +66,6 @@ func TestExploraty(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 1, len(blocks))
 	require.Equal(t, 1, len(order))
-
 }
 
 // Feature #2220 and  #2239: Optimize Trusted state synchronization
