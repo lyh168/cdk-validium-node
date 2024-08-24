@@ -753,7 +753,7 @@ func forkIDIntervals(ctx context.Context, st *state.State, etherman *etherman.Cl
 		if err != nil && !errors.Is(err, state.ErrStateNotSynchronized) {
 			return []state.ForkIDInterval{}, fmt.Errorf("error checking lastL1BlockSynced. Error: %v", err)
 		}
-		if lastBlock != nil {
+		if lastBlock != nil && lastBlock.BlockNumber >= genesisBlockNumber {
 			log.Info("Getting forkIDs intervals. Please wait...")
 			// Read Fork ID FROM POE SC
 			forkIntervals, err := etherman.GetForks(ctx, genesisBlockNumber, lastBlock.BlockNumber)
