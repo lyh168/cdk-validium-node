@@ -44,6 +44,31 @@ type mocks struct {
 	//EventLog     *eventLogMock
 }
 
+func TestExploraty(t *testing.T) {
+	t.Skip("This test a real tests, it is just for exploratory purposes")
+	cfg := etherman.Config{
+		URL:              "https://eth-sepolia.g.alchemy.com/v2/",
+		ForkIDChunkSize:  100,
+		MultiGasProvider: false,
+	}
+	l1Config := etherman.L1Config{
+		L1ChainID:                 1,
+		ZkEVMAddr:                 common.HexToAddress("0xf3eca1d175cd7811519e251a9e0c7f13c9217734"),
+		RollupManagerAddr:         common.HexToAddress("0x32d33d5137a7cffb54c5bf8371172bcec5f310ff"),
+		PolAddr:                   common.HexToAddress("0x6a7c3f4b0651d6da389ad1d11d962ea458cdca70"),
+		GlobalExitRootManagerAddr: common.HexToAddress("0xad1490c248c5d3cbae399fd529b79b42984277df"),
+	}
+
+	eth, err := etherman.NewClient(cfg, l1Config, nil)
+	require.NoError(t, err)
+	blockNumber := uint64(6510565)
+	blocks, order, err := eth.GetRollupInfoByBlockRange(context.TODO(), blockNumber, &blockNumber)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(blocks))
+	require.Equal(t, 1, len(order))
+
+}
+
 // Feature #2220 and  #2239: Optimize Trusted state synchronization
 //
 //	this Check partially point 2: Use previous batch stored in memory to avoid getting from database
