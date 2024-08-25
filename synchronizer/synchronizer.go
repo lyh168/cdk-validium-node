@@ -631,7 +631,7 @@ func (s *ClientSynchronizer) RequestAndProcessRollupGenesisBlock(dbTx pgx.Tx, la
 		return err
 	}
 	// Check that the response is the expected. It should be 1 block with ForkID event
-	log.Debugf("genesis block (%d) events: %+v", lastEthBlockSynced.BlockNumber, order)
+	log.Debugf("SanityCheck for genesis block (%d) events: %+v", lastEthBlockSynced.BlockNumber, order)
 	err = sanityCheckForGenesisBlockRollupInfo(blocks, order)
 	if err != nil {
 		return err
@@ -639,24 +639,9 @@ func (s *ClientSynchronizer) RequestAndProcessRollupGenesisBlock(dbTx pgx.Tx, la
 	log.Infof("Processing genesis block %d orders: %+v", lastEthBlockSynced.BlockNumber, order)
 	err = s.internalProcessBlock(blocks[0], order[blocks[0].BlockHash], false, dbTx)
 	if err != nil {
-		log.Error("error processinge events on genesis block %d:  err:%w", lastEthBlockSynced.BlockNumber, err)
+		log.Errorf("error processinge events on genesis block %d:  err:%w", lastEthBlockSynced.BlockNumber, err)
 	}
-	/*forkId := s.state.GetForkIDByBlockNumber(blocks[0].BlockNumber)
-	err = s.l1EventProcessors.Process(s.ctx, actions.ForkIdType(forkId), etherman.Order{Name: etherman.ForkIDsOrder, Pos: 0}, &blocks[0], dbTx)
-	if err != nil {
-		log.Error("error storing genesis forkID: ", err)
-		return err
-	}
-	if len(blocks[0].SequencedBatches) != 0 {
-		batchSequence := l1event_orders.GetSequenceFromL1EventOrder(etherman.InitialSequenceBatchesOrder, &blocks[0], 0)
-		forkId = s.state.GetForkIDByBatchNumber(batchSequence.FromBatchNumber)
-		err = s.l1EventProcessors.Process(s.ctx, actions.ForkIdType(forkId), etherman.Order{Name: etherman.InitialSequenceBatchesOrder, Pos: 0}, &blocks[0], dbTx)
-		if err != nil {
-			log.Error("error storing initial tx (batch 1): ", err)
-			return err
-		}
-	}
-	*/
+
 	return nil
 }
 
