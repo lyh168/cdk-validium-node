@@ -435,6 +435,9 @@ func (s *ClientSynchronizer) Sync() error {
 	// If there is no lastEthereumBlock means that sync from the beginning is necessary. If not, it continues from the retrieved ethereum block
 	// Get the latest synced block. If there is no block on db, use genesis block
 	log.Info("Sync started")
+	if s.asyncL1BlockChecker != nil {
+		_ = s.asyncL1BlockChecker.OnStart(s.ctx)
+	}
 
 	genesisDone, lastEthBlockSynced, err := s.isGenesisProcessed(s.ctx, nil)
 	if err != nil {

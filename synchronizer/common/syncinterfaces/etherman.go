@@ -17,11 +17,10 @@ type EthermanFullInterface interface {
 	GetTrustedSequencerURL() (string, error)
 	VerifyGenBlockNumber(ctx context.Context, genBlockNumber uint64) (bool, error)
 	GetLatestVerifiedBatchNum() (uint64, error)
-	EthermanGetLatestBatchNumber
-	EthermanPreRollup
 
 	EthermanGetLatestBatchNumber
 	GetFinalizedBlockNumber(ctx context.Context) (uint64, error)
+	EthermanPreRollup
 }
 
 type EthermanGetLatestBatchNumber interface {
