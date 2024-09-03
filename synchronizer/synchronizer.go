@@ -294,20 +294,21 @@ func (s *ClientSynchronizer) isGenesisProcessed(ctx context.Context, dbTx pgx.Tx
 // bool -> need to process blocks
 // uint64 -> first block to synchronize
 // error -> error
-// 1. First try to get last block on DB, if there are could be fully synced or pending blocks
-// 2. If DB is empty the LxLy upgrade block as starting point
+// 1. Check last synced block on DB, if there are any could be fully synced (>=genesis) or syncing pre-genesis events (<genesis)
+// 2. If no block DB then get the LxLy upgrade block as starting point for pre-genesis or use the genesis block as starting point
 func (s *ClientSynchronizer) getStartingL1Block(ctx context.Context, genesisBlockNumber, rollupManagerBlockNumber uint64, dbTx pgx.Tx) (bool, uint64, error) {
 	lastBlock, err := s.state.GetLastBlock(ctx, dbTx)
 	if err != nil && errors.Is(err, state.ErrStateNotSynchronized) {
 		// No block on DB
 		upgradeLxLyBlockNumber := rollupManagerBlockNumber
-		if upgradeLxLyBlockNumber == 0 {
+		if upgradeLxLyBlockNumber == state.AutoDiscoverRollupManagerBlockNumber {
 			upgradeLxLyBlockNumber, err = s.etherMan.GetL1BlockUpgradeLxLy(ctx, genesisBlockNumber)
 			if err != nil && errors.Is(err, etherman.ErrNotFound) {
 				log.Infof("sync pregenesis: LxLy upgrade not detected before genesis block %d, it'll be sync as usual. Nothing to do yet", genesisBlockNumber)
 				return false, 0, nil
 			} else if err != nil {
-				log.Errorf("sync pregenesis: error getting LxLy upgrade block. Error: %v", err)
+				log.Errorf("sync pre-genesis: error getting LxLy upgrade block. Maybe your provider doesnt support eth_getLogs big block range,"+
+					".Suggestion:  inform the field rollupManagerCreationBlockNumber in genesis file to avoid auto-discover. Error: %v", err)
 				return false, 0, err
 			}
 		}

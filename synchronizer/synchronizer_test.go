@@ -2,6 +2,7 @@ package synchronizer
 
 import (
 	context "context"
+	"fmt"
 	"math"
 	"math/big"
 	"testing"
@@ -42,6 +43,41 @@ type mocks struct {
 	ZKEVMClient                   *mock_syncinterfaces.ZKEVMClientInterface
 	zkEVMClientEthereumCompatible *mock_syncinterfaces.ZKEVMClientEthereumCompatibleInterface
 	//EventLog     *eventLogMock
+}
+
+func TestGetStartingL1BlockAutodiscover(t *testing.T) {
+	genesis, cfg, m := setupGenericTest(t)
+	ethermanForL1 := []syncinterfaces.EthermanFullInterface{m.Etherman}
+	syncInterface, err := NewSynchronizer(false, m.Etherman, ethermanForL1, m.State, m.Pool, m.EthTxManager, m.ZKEVMClient, m.zkEVMClientEthereumCompatible, nil, *genesis, *cfg, false)
+	require.NoError(t, err)
+	sync, ok := syncInterface.(*ClientSynchronizer)
+	require.True(t, ok)
+	ctx := context.TODO()
+	t.Run("getStartingL1Block autodiscover OK", func(t *testing.T) {
+		m.State.EXPECT().GetLastBlock(ctx, nil).Return(nil, state.ErrStateNotSynchronized).Once()
+		m.Etherman.EXPECT().GetL1BlockUpgradeLxLy(mock.Anything, mock.Anything).Return(uint64(100), nil).Once()
+		needProcess, firstBlock, err := sync.getStartingL1Block(ctx, 123, 0, nil)
+		require.NoError(t, err)
+		require.True(t, needProcess)
+		require.Equal(t, uint64(100), firstBlock)
+	})
+
+	t.Run("getStartingL1Block autodiscover Fails", func(t *testing.T) {
+		m.State.EXPECT().GetLastBlock(ctx, nil).Return(nil, state.ErrStateNotSynchronized).Once()
+		m.Etherman.EXPECT().GetL1BlockUpgradeLxLy(mock.Anything, mock.Anything).Return(uint64(0), fmt.Errorf("error")).Once()
+		_, _, err = sync.getStartingL1Block(ctx, 123, 0, nil)
+		require.Error(t, err)
+	})
+
+	t.Run("getStartingL1Block have already started sync", func(t *testing.T) {
+		m.State.EXPECT().GetLastBlock(ctx, nil).Return(&state.Block{BlockNumber: 100}, nil).Once()
+
+		needProcess, firstBlock, err := sync.getStartingL1Block(ctx, 123, 0, nil)
+		require.NoError(t, err)
+		require.True(t, needProcess)
+		require.Equal(t, uint64(101), firstBlock)
+	})
+
 }
 
 // Feature #2220 and  #2239: Optimize Trusted state synchronization
