@@ -33,6 +33,7 @@ const (
 	// SequentialMode is the value for L1SynchronizationMode to run in sequential mode
 	SequentialMode         = "sequential"
 	maxBatchNumber         = ^uint64(0)
+	maxBlockNumber         = ^uint64(0)
 	timeOfLiveBatchOnCache = 5 * time.Minute
 )
 
@@ -637,7 +638,7 @@ func (s *ClientSynchronizer) RequestAndProcessRollupGenesisBlock(dbTx pgx.Tx, la
 		return err
 	}
 	log.Infof("Processing genesis block %d orders: %+v", lastEthBlockSynced.BlockNumber, order)
-	err = s.internalProcessBlock(blocks[0], order[blocks[0].BlockHash], false, dbTx)
+	err = s.internalProcessBlock(maxBlockNumber, blocks[0], order[blocks[0].BlockHash], false, dbTx)
 	if err != nil {
 		log.Errorf("error processinge events on genesis block %d:  err:%w", lastEthBlockSynced.BlockNumber, err)
 	}
@@ -806,7 +807,7 @@ func (s *ClientSynchronizer) ProcessBlockRange(blocks []etherman.Block, order ma
 			log.Errorf("error creating db transaction to store block. BlockNumber: %d, error: %v", blocks[i].BlockNumber, err)
 			return err
 		}
-		err = s.internalProcessBlock(blocks[i], order[blocks[i].BlockHash], true, dbTx)
+		err = s.internalProcessBlock(finalizedBlockNumber, blocks[i], order[blocks[i].BlockHash], true, dbTx)
 		if err != nil {
 			log.Error("rollingback BlockNumber: %d, because error internalProcessBlock: ", blocks[i].BlockNumber, err)
 			// If any goes wrong we ensure that the state is rollbacked
@@ -820,7 +821,6 @@ func (s *ClientSynchronizer) ProcessBlockRange(blocks []etherman.Block, order ma
 
 		err = dbTx.Commit(s.ctx)
 		if err != nil {
-			// If any goes wrong we ensure that the state is rollbacked
 			log.Errorf("error committing state to store block. BlockNumber: %d, err: %v", blocks[i].BlockNumber, err)
 			rollbackErr := dbTx.Rollback(s.ctx)
 			if rollbackErr != nil {
@@ -833,8 +833,8 @@ func (s *ClientSynchronizer) ProcessBlockRange(blocks []etherman.Block, order ma
 	return nil
 }
 
-// ProcessBlockRange process the L1 events and stores the information in the db
-func (s *ClientSynchronizer) internalProcessBlock(blocks etherman.Block, order []etherman.Order, addBlock bool, dbTx pgx.Tx) error {
+// internalProcessBlock process one iteration of events and stores the information in the db
+func (s *ClientSynchronizer) internalProcessBlock(finalizedBlockNumber uint64, blocks etherman.Block, order []etherman.Order, addBlock bool, dbTx pgx.Tx) error {
 	var err error
 	// New info has to be included into the db using the state
 	if addBlock {
@@ -843,6 +843,9 @@ func (s *ClientSynchronizer) internalProcessBlock(blocks etherman.Block, order [
 			BlockHash:   blocks.BlockHash,
 			ParentHash:  blocks.ParentHash,
 			ReceivedAt:  blocks.ReceivedAt,
+		}
+		if blocks.BlockNumber <= finalizedBlockNumber {
+			b.Checked = true
 		}
 		// Add block information
 		log.Debugf("Storing block. Block: %s", b.String())
