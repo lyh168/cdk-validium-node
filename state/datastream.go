@@ -87,7 +87,7 @@ type DSState interface {
 }
 
 // GenerateDataStreamFile generates or resumes a data stream file
-func GenerateDataStreamFile(ctx context.Context, streamServer *datastreamer.StreamServer, stateDB DSState, readWIPBatch bool, imStateRoots *map[uint64][]byte, chainID uint64, upgradeEtrogBatchNumber uint64) error {
+func GenerateDataStreamFile(ctx context.Context, streamServer *datastreamer.StreamServer, stateDB DSState, readWIPBatch bool, imStateRoots *map[uint64][]byte, chainID uint64, upgradeEtrogBatchNumber uint64, endL2BlockNumber uint64) error {
 	header := streamServer.GetHeader()
 
 	var currentBatchNumber uint64 = 0
@@ -315,7 +315,7 @@ func GenerateDataStreamFile(ctx context.Context, streamServer *datastreamer.Stre
 	}
 
 	var err error
-	const limit = 10000
+	const limit = 100
 
 	log.Infof("Current entry number: %d", entry)
 	log.Infof("Current batch number: %d", currentBatchNumber)
@@ -336,6 +336,8 @@ func GenerateDataStreamFile(ctx context.Context, streamServer *datastreamer.Stre
 		if len(batches) == 0 {
 			break
 		}
+
+		log.Infof("process the currentBatchNumber is : %d---%d", currentBatchNumber, currentBatchNumber+limit)
 
 		l2Blocks, err := stateDB.GetDSL2Blocks(ctx, batches[0].BatchNumber, batches[len(batches)-1].BatchNumber, nil)
 		if err != nil {
@@ -631,6 +633,11 @@ func GenerateDataStreamFile(ctx context.Context, streamServer *datastreamer.Stre
 			if err != nil {
 				return err
 			}
+		}
+
+		if len(l2Blocks) > 0 && l2Blocks[len(l2Blocks)-1].L2BlockNumber > endL2BlockNumber {
+			log.Infof("process the end L2BlockNumber is : %d  %d", l2Blocks[len(l2Blocks)-1].L2BlockNumber, endL2BlockNumber)
+			break
 		}
 	}
 
