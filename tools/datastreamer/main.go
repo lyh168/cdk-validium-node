@@ -243,13 +243,13 @@ func generate(cliCtx *cli.Context) error {
 	var imStateRootsMux *sync.Mutex = new(sync.Mutex)
 	var wg sync.WaitGroup
 
-	lastL2BlockHeader, err := stateDB.GetLastL2BlockHeader(cliCtx.Context, nil)
-	if err != nil {
-		log.Error(err)
-		os.Exit(1)
-	}
+	//lastL2BlockHeader, err := stateDB.GetLastL2BlockHeader(cliCtx.Context, nil)
+	//if err != nil {
+	//	log.Error(err)
+	//	os.Exit(1)
+	//}
 
-	maxL2Block := lastL2BlockHeader.Number.Uint64()
+	maxL2Block := endL2BlockNumber
 	imStateRoots = make(map[uint64][]byte, maxL2Block)
 
 	// Check if a cache file exists
